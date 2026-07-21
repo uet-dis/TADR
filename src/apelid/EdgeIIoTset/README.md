@@ -50,28 +50,7 @@ The pipeline trains six models: **xgb, catb, bagging, lgbm, rf, dnn**.
 
 ## 3) Stage-by-stage I/O details
 
-### 3.1 `preprocessing.py`
-
-**What it is:** Prepare the Edge-IIoTset data: load raw CSV → select features → clean → train/test split → fit and save encoders.
-
-**Input:** `resources/ML-EdgeIIoT-dataset.csv` (raw dump; must be supplied by the user).
-
-**Output (under `src/apelid/EdgeIIoTset/resources/`):**
-- `edgeiot_original.csv`
-- `clean_merged/edgeiot_clean_merged.csv`
-- `clean_merged/edgeiot_train_clean_merged.csv` (default `--clean-input` for the pipeline)
-- `clean_merged/edgeiot_test_clean_merged.csv` (default test file for `model_training.py`)
-- `encoders/` — saved OneHotEncoder, MinMaxScaler, OrdinalEncoder, LabelEncoder
-
-**Run:**
-
-```bash
-python src/apelid/EdgeIIoTset/preprocessing.py
-```
-
----
-
-### 3.2 `symmetric_label_noise.py`
+### 3.1 `symmetric_label_noise.py`
 
 **What it is:** Inject targeted noise by flipping non-`Normal` labels to `Normal`.
 
@@ -94,7 +73,7 @@ python src/apelid/EdgeIIoTset/symmetric_label_noise.py \
 
 ---
 
-### 3.3 `dae_kmeans_knn_benign_filter.py`
+### 3.2 `dae_kmeans_knn_benign_filter.py`
 
 **What it is:** TADR defense stage (DAE embeddings + KMeans benign-core + weighted KNN detection).
 
@@ -123,7 +102,7 @@ python src/apelid/EdgeIIoTset/dae_kmeans_knn_benign_filter.py \
 
 ---
 
-### 3.4 `dnn_recover_grid.py`
+### 3.3 `dnn_recover_grid.py`
 
 **What it is:** Recover high-confidence samples from the DAE-noise set using a fixed DNN configuration (attack/benign threshold = 0.9, per-class recovery cap ratio = 0.5).
 
@@ -150,7 +129,7 @@ python src/apelid/EdgeIIoTset/dnn_recover_grid.py \
 
 ---
 
-### 3.5 `model_training.py`
+### 3.4 `model_training.py`
 
 **What it is:** Train all ablation models and export model artifacts + metrics.
 
