@@ -1,0 +1,44 @@
+[project]
+name = "apelid"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Kiet Le", email = "letuankiet.hn@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "adversarial-robustness-toolbox>=1.20.1",
+    "catboost>=1.2.8",
+    "colorama>=0.4.6",
+    "cleanlab>=2.7.1",
+    "imblearn>=0.0",
+    "joblib>=1.5.1",
+    "matplotlib>=3.10.3",
+    "nvidia-smi>=0.1.3",
+    "numpy>=2.3.2,<2.4.0",
+    "pandas>=2.3.2",
+    "pydantic>=2.12.5",
+    "scikit-learn>=1.6.1",
+    "seaborn>=0.13.2",
+    "tabpfn>=2.2.1",
+    "torch>=2.6.0",
+    "tqdm>=4.67.1",
+    "xgboost>=3.1.2",
+    "lightgbm>=4.6.0",
+]
+
+[project.scripts]
+apelid = "apelid:main"
+
+[build-system]
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+models/
+*.egg-info
+catboost_info/*
+*/catboost_info/
+# Virtual environments
+.venv
+results_visualization/
+*.csv
+*.log
+*.tex
+*.png
+*.pdf
+*.json
+.github/
+catboost_info/
+*.txt
+*/reports/*
+*/resources/*
+catboost_info/*
+reports/
+resources/
