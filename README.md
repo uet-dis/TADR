@@ -50,11 +50,11 @@ It provides an end-to-end ablation pipeline that:
 
 You can either use the preprocessed bundle or download the raw datasets yourself:
 
-- **Option A** — Use the preprocessed CSV bundle from Google Drive: `<PASTE_GOOGLE_DRIVE_LINK_HERE>` (recommended, fastest).
+- **Option A** — Use the preprocessed CSV bundle from Google Drive: [Link](https://drive.google.com/drive/folders/1Kxowaim0NSRChkR8NtBkiQ51kpvxWJlO?usp=sharing) (recommended, fastest).
 - **Option B** — Download the raw datasets from the original sources:
-  - **NSL-KDD**: <https://www.unb.ca/cic/datasets/nsl.html>
-  - **CIC-IDS-2018**: <https://www.unb.ca/cic/datasets/ids-2018.html>
-  - **Edge-IIoTset**: <https://github.com/Edge-IIoTset/Edge-IIoTset_Dataset>
+  - **NSL-KDD**: [Link](https://www.unb.ca/cic/datasets/nsl.html)
+  - **CIC-IDS-2018**: [Link](https://www.unb.ca/cic/datasets/ids-2018.html)
+  - **Edge-IIoTset**: [Link](https://www.kaggle.com/datasets/mohamedamineferrag/edgeiiotset-cyber-security-dataset-of-iot-iiot)
 
 ---
 
