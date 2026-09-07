@@ -8,18 +8,37 @@ It is part of the larger TADR ablation framework. For the top-level description,
 
 ## Table of contents
 
-1. [Pipeline overview](#1-pipeline-overview)
-2. [How to run the full pipeline](#2-how-to-run-the-full-pipeline)
-3. [Stage-by-stage I/O details](#3-stage-by-stage-io-details)
-   - 3.1 [`preprocessing.py`](#31-preprocessingpy)
-   - 3.2 [`symmetric_label_noise.py`](#32-symmetric_label_noisepy)
-   - 3.3 [`dae_kmeans_knn_benign_filter.py`](#33-dae_kmeans_knn_benign_filterpy)
-   - 3.4 [`dnn_recover_grid.py`](#34-dnn_recover_gridpy)
-   - 3.5 [`model_training.py`](#35-model_trainingpy)
+1. [Data Preprocessing](#1-data-preprocessing)
+2. [Pipeline overview](#2-pipeline-overview)
+3. [How to run the full pipeline](#3-how-to-run-the-full-pipeline)
+4. [Stage-by-stage I/O details](#4-stage-by-stage-io-details)
+5. [Baseline Defenses](#5-baseline-defenses)
 
 ---
 
-## 1) Pipeline overview
+## 1. Data Preprocessing
+
+### Option A — Use the preprocessed CSV bundle (recommended, fastest)
+Download the preprocessed CSV bundle from the project Google Drive:
+**[https://drive.google.com/drive/folders/1Kxowaim0NSRChkR8NtBkiQ51kpvxWJlO?usp=sharing](https://drive.google.com/drive/folders/1Kxowaim0NSRChkR8NtBkiQ51kpvxWJlO?usp=sharing)**
+
+### Option B — Preprocess from raw sources
+Run the single preprocessing script to produce the cleaned training CSV and fitted encoders:
+
+```bash
+python src/apelid/EdgeIIoTset/preprocessing.py
+```
+
+**Outputs:**
+| File | Description |
+|---|---|
+| `edgeiot_clean_merged.csv` | Full cleaned dataset |
+| `edgeiot_train_clean_merged.csv` | 70 % training split — used by all baselines |
+| `edgeiot_test_clean_merged.csv` | 30 % test split |
+
+---
+
+## 2. Pipeline overview
 
 **Main runner:** `ablation_pipeline.py`
 
@@ -34,7 +53,7 @@ It is part of the larger TADR ablation framework. For the top-level description,
 
 ---
 
-## 2) How to run the full pipeline
+## 3. How to run the full pipeline
 
 ```bash
 python src/apelid/EdgeIIoTset/ablation_pipeline.py \
@@ -48,9 +67,9 @@ The pipeline trains six models: **xgb, catb, bagging, lgbm, rf, dnn**.
 
 ---
 
-## 3) Stage-by-stage I/O details
+## 4. Stage-by-stage I/O details
 
-### 3.1 `symmetric_label_noise.py`
+### 4.1 `symmetric_label_noise.py`
 
 **What it is:** Inject targeted noise by flipping non-`Normal` labels to `Normal`.
 
@@ -73,7 +92,7 @@ python src/apelid/EdgeIIoTset/symmetric_label_noise.py \
 
 ---
 
-### 3.2 `dae_kmeans_knn_benign_filter.py`
+### 4.2 `dae_kmeans_knn_benign_filter.py`
 
 **What it is:** TADR defense stage (DAE embeddings + KMeans benign-core + weighted KNN detection).
 
@@ -86,7 +105,7 @@ python src/apelid/EdgeIIoTset/symmetric_label_noise.py \
 - `<name>_clean.csv`
 - `<name>_noise.csv`
 - `noise_detection_report.json`
-- `noise_detection_per_label.csv` (when original labels available)
+- `noise_detection_per_label.csv`
 - `*_dae_kmeans_knn.log`
 
 **Run:**
@@ -102,7 +121,7 @@ python src/apelid/EdgeIIoTset/dae_kmeans_knn_benign_filter.py \
 
 ---
 
-### 3.3 `dnn_recover_grid.py`
+### 4.3 `dnn_recover_grid.py`
 
 **What it is:** Recover high-confidence samples from the DAE-noise set using a fixed DNN configuration (attack/benign threshold = 0.9, per-class recovery cap ratio = 0.5).
 
@@ -129,7 +148,7 @@ python src/apelid/EdgeIIoTset/dnn_recover_grid.py \
 
 ---
 
-### 3.4 `model_training.py`
+### 4.4 `model_training.py`
 
 **What it is:** Train all ablation models and export model artifacts + metrics.
 
@@ -155,4 +174,40 @@ python src/apelid/EdgeIIoTset/model_training.py \
   --device auto
 ```
 
-> `--output-dir` is required. Per-model hyperparameters live in `params/training/*.json`.
+---
+
+## 5. Baseline Defenses
+
+### KNN (`benchmark_sota.py`)
+
+| Stage | Folder | Reads | Writes |
+|---|---|---|---|
+| Noise injection | `noise_{pct}/00_symmetric_label_noise/` | `--clean-input` (clean CSV) | `noise_{pct}_data.csv` + `.log` |
+| Sanitization | `noise_{pct}/01_knn_sanitization/` | `noise_{pct}_data.csv` | `noise_{pct}_knn_sanitized.csv` + `_report.json` + `.log` |
+| Training | `noise_{pct}/02_model_training/` | `noise_{pct}_knn_sanitized.csv` | per-model `.pkl` / `.pth`, `_metrics.json`, `_cm.png` |
+| Aggregation | `<reports>/sota-benign-only/{timestamp}/` | per-noise-rate metrics | `sota_knn_summary.csv` |
+
+---
+
+### Cleanlab (`benchmark_cleanlab_sota.py`)
+
+| Stage | Folder | Reads | Writes |
+|---|---|---|---|
+| Noise injection | `noise_{pct}/00_symmetric_label_noise/` | `--clean-input` (clean CSV) | `noise_{pct}_data.csv` + `.log` |
+| Sanitization | `noise_{pct}/01_cleanlab_sanitization/` | `noise_{pct}_data.csv` | `noise_{pct}_cleanlab_sanitized.csv` + `_report.json` + `.log` |
+| Training | `noise_{pct}/02_model_training/` | `noise_{pct}_cleanlab_sanitized.csv` | per-model `.pkl` / `.pth`, `_metrics.json`, `_cm.png` |
+| Aggregation | `<reports>/sota_cleanlab_benign_only/{timestamp}/` | per-noise-rate metrics | `sota_cleanlab_summary.csv` |
+
+---
+
+### UQ-LED (`benchmark_uqled_sota.py`)
+
+UQ-LED produces both global and benign-only CSVs in a single run.
+
+| Stage | Folder | Reads | Writes |
+|---|---|---|---|
+| Noise injection | `noise_{pct}/00_targeted_label_noise/` | `--clean-input` (clean CSV) | `noise_{pct}_data.csv` + `.log` |
+| UQ-LED defense | `noise_{pct}/01_uqled_cl_mcd_e/` | `noise_{pct}_data.csv` | `noise_{pct}_uqled_global.csv`, `noise_{pct}_uqled_benign_only.csv`, `_report.json`, `_oof_mcd.npz`, `.log` |
+| Global training | `noise_{pct}/02_global_model_training/` | `noise_{pct}_uqled_global.csv` | per-model `.pkl` / `.pth`, `_metrics.json`, `_cm.png` |
+| Benign-only training | `noise_{pct}/03_benign_only_model_training/` | `noise_{pct}_uqled_benign_only.csv` | per-model `.pkl` / `.pth`, `_metrics.json`, `_cm.png` |
+| Aggregation | `<reports>/sota_uqled/{timestamp}/` | per-noise-rate & per-scope metrics | `sota_uqled_summary.csv` |

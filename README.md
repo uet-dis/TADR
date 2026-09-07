@@ -204,6 +204,134 @@ src/apelid/<DATASET>/reports/ablation_logs/
 
 ---
 
+## Running the Baseline Defenses
+
+### KNN Label Sanitization
+
+**Defense script:** `knn_label_sanitization.py`
+**Benchmark script:** `benchmark_sota.py`
+
+The `--only-benign` flag controls which samples are eligible for sanitization.
+
+**NSL-KDD (full training set):**
+
+```bash
+python src/apelid/NSL_KDD/benchmark_sota.py \
+  --clean-input src/apelid/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
+  --noise-rates 30,40,50,60,70 \
+  --k 15 \
+  --eta 0.5
+```
+
+**Edge-IIoTset (benign-only sanitization):**
+
+```bash
+python src/apelid/EdgeIIoTset/benchmark_sota.py \
+  --clean-input src/apelid/EdgeIIoTset/resources/edgeiot/clean_merged/edgeiot_train_clean_merged.csv \
+  --noise-rates 30,40,50 \
+  --k 15 \
+  --eta 0.5 \
+  --only-benign
+```
+
+**Key CLI flags**
+
+| Flag | Description |
+|---|---|
+| `--clean-input` | Path to the clean preprocessed training CSV. |
+| `--noise-rates` | Comma-separated poisoning percentages, e.g. `30,40,50`. |
+| `--k` | Number of nearest neighbors (default: 15). |
+| `--eta` | Confidence threshold for KNN relabeling (default: 0.5). |
+| `--only-benign` | Restrict sanitization to benign-labeled samples only. |
+| `--sota-dir` | Root output directory (default: `reports/sota/`). |
+
+Outputs land under `reports/sota/{timestamp}/noise_{pct}/` as `noise_{pct}_knn_sanitized.csv` + per-model metrics aggregated into `sota_knn_summary.csv`.
+
+---
+
+### Cleanlab Confident Learning
+
+**Defense script:** `cleanlab_defense.py`
+**Benchmark script:** `benchmark_cleanlab_sota.py`
+
+The `--only-benign` flag controls the candidate mask passed to the cleanlab filter.
+
+**CIC-IDS-2018 (full training set):**
+
+```bash
+python src/apelid/IDS18/benchmark_cleanlab_sota.py \
+  --clean-input src/apelid/IDS18/resources/IDS18/clean_merged/ids18_train_clean_merged.csv \
+  --noise-rates 30,40,50,60,70 \
+  --model-type lgbm \
+  --threshold 0.5
+```
+
+**NSL-KDD (benign-only sanitization):**
+
+```bash
+python src/apelid/NSL_KDD/benchmark_cleanlab_sota.py \
+  --clean-input src/apelid/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
+  --noise-rates 30,40,50 \
+  --model-type rf \
+  --threshold 0.5 \
+  --only-benign
+```
+
+**Key CLI flags**
+
+| Flag | Description |
+|---|---|
+| `--clean-input` | Path to the clean preprocessed training CSV. |
+| `--noise-rates` | Comma-separated poisoning percentages, e.g. `30,40,50`. |
+| `--model-type` | Detector model: `lgbm` (default) or `rf`. |
+| `--threshold` | Label-quality threshold — lower values are stricter (default: 0.5, must be in (0, 1]). |
+| `--only-benign` | Restrict Cleanlab evaluation to benign-labeled samples only. |
+| `--sota-dir` | Root output directory (default: `reports/sota_cleanlab/`). |
+
+Outputs land under `reports/sota_cleanlab/{timestamp}/noise_{pct}/` as `noise_{pct}_cleanlab_sanitized.csv` + per-model metrics aggregated into `sota_cleanlab_summary.csv`.
+
+---
+
+### UQ-LED CL-MCD-E
+
+**Defense script:** `uqled_defense.py`
+**Benchmark script:** `benchmark_uqled_sota.py`
+
+**NSL-KDD, both scopes:**
+
+```bash
+python src/apelid/NSL_KDD/benchmark_uqled_sota.py \
+  --clean-input src/apelid/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
+  --noise-rates 30,40,50,60,70 \
+  --scopes both \
+  --device auto
+```
+
+**Edge-IIoTset, benign_only only:**
+
+```bash
+python src/apelid/EdgeIIoTset/benchmark_uqled_sota.py \
+  --clean-input src/apelid/EdgeIIoTset/resources/edgeiot/clean_merged/edgeiot_train_clean_merged.csv \
+  --noise-rates 30,40,50 \
+  --scopes benign_only \
+  --device auto
+```
+
+**Key CLI flags**
+
+| Flag | Description |
+|---|---|
+| `--clean-input` | Path to the clean preprocessed training CSV. |
+| `--noise-rates` | Comma-separated poisoning percentages, e.g. `30,40,50`. |
+| `--scopes` | `both` (default), `global`, or `benign_only`. |
+| `--device` | `auto` (default), `cpu`, or `cuda`. |
+| `--seed` | Random seed (default: 42). |
+| `--sota-dir` | Root output directory (default: `reports/sota_uqled/`). |
+
+Outputs land under `reports/sota_uqled/{timestamp}/noise_{pct}/` as `noise_{pct}_uqled_global.csv` and/or `noise_{pct}_uqled_benign_only.csv` (depending on `--scopes`), plus per-model metrics aggregated into `sota_uqled_summary.csv`.
+
+---
+
 ## Per-Dataset Guides
 
 Detailed I/O, CLI, and file-layout documentation for each dataset lives in its own README:
@@ -222,28 +350,46 @@ Detailed I/O, CLI, and file-layout documentation for each dataset lives in its o
 ├── README.md                      # This file
 └── src/
     └── apelid/
-        ├── NSL_KDD/               # NSL-KDD ablation pipeline
-        │   ├── ablation_pipeline.py
-        │   ├── symmetric_label_noise.py
-        │   ├── dae_kmeans_knn_benign_filter.py
-        │   ├── dnn_recover_grid.py
-        │   ├── training/
-        │   ├── preprocessing.py
-        │   └── README.md
-        ├── IDS18/                 # CIC-IDS-2018 ablation pipeline
+        ├── NSL_KDD/               # NSL-KDD ablation pipeline + baselines
         │   ├── ablation_pipeline.py
         │   ├── symmetric_label_noise.py
         │   ├── dae_kmeans_knn_benign_filter.py
         │   ├── dnn_recover_grid.py
         │   ├── model_training.py
         │   ├── preprocessing/
-        │   └── README.md
-        └── EdgeIIoTset/           # Edge-IIoTset ablation pipeline
+        │   │   └── README.md
+        │   ├── benchmark_sota.py         # KNN baseline benchmark
+        │   ├── benchmark_cleanlab_sota.py # Cleanlab baseline benchmark
+        │   ├── benchmark_uqled_sota.py   # UQ-LED baseline benchmark
+        │   ├── knn_label_sanitization.py  # KNN label sanitization
+        │   ├── cleanlab_defense.py        # Cleanlab label cleaning
+        │   └── uqled_defense.py           # UQ-LED label error detection
+        ├── IDS18/                 # CIC-IDS-2018 ablation pipeline + baselines
+        │   ├── ablation_pipeline.py
+        │   ├── symmetric_label_noise.py
+        │   ├── dae_kmeans_knn_benign_filter.py
+        │   ├── dnn_recover_grid.py
+        │   ├── model_training.py
+        │   ├── preprocessing/
+        │   │   └── README.md
+        │   ├── benchmark_sota.py         # KNN baseline benchmark
+        │   ├── benchmark_cleanlab_sota.py # Cleanlab baseline benchmark
+        │   ├── benchmark_uqled_sota.py   # UQ-LED baseline benchmark
+        │   ├── knn_label_sanitization.py  # KNN label sanitization
+        │   ├── cleanlab_defense.py        # Cleanlab label cleaning
+        │   └── uqled_defense.py           # UQ-LED label error detection
+        └── EdgeIIoTset/           # Edge-IIoTset ablation pipeline + baselines
             ├── ablation_pipeline.py
             ├── preprocessing.py
             ├── symmetric_label_noise.py
             ├── dae_kmeans_knn_benign_filter.py
             ├── dnn_recover_grid.py
             ├── model_training.py
+            ├── benchmark_sota.py         # KNN baseline benchmark
+            ├── benchmark_cleanlab_sota.py # Cleanlab baseline benchmark
+            ├── benchmark_uqled_sota.py   # UQ-LED baseline benchmark
+            ├── knn_label_sanitization.py  # KNN label sanitization
+            ├── cleanlab_defense.py        # Cleanlab label cleaning
+            ├── uqled_defense.py           # UQ-LED label error detection
             └── README.md
 ```
