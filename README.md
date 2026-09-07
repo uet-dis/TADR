@@ -38,9 +38,9 @@ It provides an end-to-end ablation pipeline that:
 
 | Dataset | Folder |
 |---|---|
-| **NSL-KDD** | `src/apelid/NSL_KDD/` | 
-| **CIC-IDS-2018** | `src/apelid/IDS18/` | 
-| **Edge-IIoTset** | `src/apelid/EdgeIIoTset/` |
+| **NSL-KDD** | `src/tadr/NSL_KDD/` | 
+| **CIC-IDS-2018** | `src/tadr/IDS18/` | 
+| **Edge-IIoTset** | `src/tadr/EdgeIIoTset/` |
 
 > All three pipelines share the same six-stage structure; per-dataset CLI flags, encoders, and preprocessing are isolated inside each folder. See the [Per-Dataset Guides](#-per-dataset-guides) for full details.
 
@@ -119,32 +119,32 @@ Every dataset ships with a single `ablation_pipeline.py` runner that executes al
 ### NSL-KDD
 
 ```bash
-python src/apelid/NSL_KDD/ablation_pipeline.py \
+python src/tadr/NSL_KDD/ablation_pipeline.py \
   --noise-rates 30,40,50 \
   --kmeans-budget 15000 \
   --k-neighbors 15 \
-  --log-dir src/apelid/NSL_KDD/reports/ablation_logs
+  --log-dir src/tadr/NSL_KDD/reports/ablation_logs
 ```
 
 ### CIC-IDS-2018
 
 ```bash
-python src/apelid/IDS18/ablation_pipeline.py \
+python src/tadr/IDS18/ablation_pipeline.py \
   --noise-rates 30,40,50 \
   --kmeans-budget 6000 \
   --k-neighbors 10 \
   --device auto \
-  --log-dir src/apelid/IDS18/reports/ablation_logs
+  --log-dir src/tadr/IDS18/reports/ablation_logs
 ```
 
 ### Edge-IIoTset
 
 ```bash
-python src/apelid/EdgeIIoTset/ablation_pipeline.py \
+python src/tadr/EdgeIIoTset/ablation_pipeline.py \
   --noise-rates 30,40,50 \
   --kmeans-budget 15000 \
   --k-neighbors 15 \
-  --log-dir src/apelid/EdgeIIoTset/reports/ablation_logs
+  --log-dir src/tadr/EdgeIIoTset/reports/ablation_logs
 ```
 
 ### Common CLI flags
@@ -166,7 +166,7 @@ python src/apelid/EdgeIIoTset/ablation_pipeline.py \
 Each pipeline run creates a **timestamped folder** under the dataset's `reports/ablation_logs/`:
 
 ```text
-src/apelid/<DATASET>/reports/ablation_logs/
+src/tadr/<DATASET>/reports/ablation_logs/
 └── {YYYYMMDD_HHMMSS}/
     ├── ablation_f1_macro_summary.csv
     └── noise_{pct}/
@@ -216,8 +216,8 @@ The `--only-benign` flag controls which samples are eligible for sanitization.
 **NSL-KDD (full training set):**
 
 ```bash
-python src/apelid/NSL_KDD/benchmark_sota.py \
-  --clean-input src/apelid/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
+python src/tadr/NSL_KDD/benchmark_sota.py \
+  --clean-input src/tadr/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
   --noise-rates 30,40,50,60,70 \
   --k 15 \
   --eta 0.5
@@ -226,8 +226,8 @@ python src/apelid/NSL_KDD/benchmark_sota.py \
 **Edge-IIoTset (benign-only sanitization):**
 
 ```bash
-python src/apelid/EdgeIIoTset/benchmark_sota.py \
-  --clean-input src/apelid/EdgeIIoTset/resources/edgeiot/clean_merged/edgeiot_train_clean_merged.csv \
+python src/tadr/EdgeIIoTset/benchmark_sota.py \
+  --clean-input src/tadr/EdgeIIoTset/resources/edgeiot/clean_merged/edgeiot_train_clean_merged.csv \
   --noise-rates 30,40,50 \
   --k 15 \
   --eta 0.5 \
@@ -259,8 +259,8 @@ The `--only-benign` flag controls the candidate mask passed to the cleanlab filt
 **CIC-IDS-2018 (full training set):**
 
 ```bash
-python src/apelid/IDS18/benchmark_cleanlab_sota.py \
-  --clean-input src/apelid/IDS18/resources/IDS18/clean_merged/ids18_train_clean_merged.csv \
+python src/tadr/IDS18/benchmark_cleanlab_sota.py \
+  --clean-input src/tadr/IDS18/resources/IDS18/clean_merged/ids18_train_clean_merged.csv \
   --noise-rates 30,40,50,60,70 \
   --model-type lgbm \
   --threshold 0.5
@@ -269,8 +269,8 @@ python src/apelid/IDS18/benchmark_cleanlab_sota.py \
 **NSL-KDD (benign-only sanitization):**
 
 ```bash
-python src/apelid/NSL_KDD/benchmark_cleanlab_sota.py \
-  --clean-input src/apelid/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
+python src/tadr/NSL_KDD/benchmark_cleanlab_sota.py \
+  --clean-input src/tadr/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
   --noise-rates 30,40,50 \
   --model-type rf \
   --threshold 0.5 \
@@ -300,8 +300,8 @@ Outputs land under `reports/sota_cleanlab/{timestamp}/noise_{pct}/` as `noise_{p
 **NSL-KDD, both scopes:**
 
 ```bash
-python src/apelid/NSL_KDD/benchmark_uqled_sota.py \
-  --clean-input src/apelid/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
+python src/tadr/NSL_KDD/benchmark_uqled_sota.py \
+  --clean-input src/tadr/NSL_KDD/resources/NSLKDD/clean_merged/nslkdd_train_clean_merged.csv \
   --noise-rates 30,40,50,60,70 \
   --scopes both \
   --device auto
@@ -310,8 +310,8 @@ python src/apelid/NSL_KDD/benchmark_uqled_sota.py \
 **Edge-IIoTset, benign_only only:**
 
 ```bash
-python src/apelid/EdgeIIoTset/benchmark_uqled_sota.py \
-  --clean-input src/apelid/EdgeIIoTset/resources/edgeiot/clean_merged/edgeiot_train_clean_merged.csv \
+python src/tadr/EdgeIIoTset/benchmark_uqled_sota.py \
+  --clean-input src/tadr/EdgeIIoTset/resources/edgeiot/clean_merged/edgeiot_train_clean_merged.csv \
   --noise-rates 30,40,50 \
   --scopes benign_only \
   --device auto
@@ -336,9 +336,9 @@ Outputs land under `reports/sota_uqled/{timestamp}/noise_{pct}/` as `noise_{pct}
 
 Detailed I/O, CLI, and file-layout documentation for each dataset lives in its own README:
 
-- NSL-KDD → [`src/apelid/NSL_KDD/README.md`](src/apelid/NSL_KDD/README.md)
-- CIC-IDS-2018 → [`src/apelid/IDS18/README.md`](src/apelid/IDS18/README.md)
-- Edge-IIoTset → [`src/apelid/EdgeIIoTset/README.md`](src/apelid/EdgeIIoTset/README.md)
+- NSL-KDD → [`src/tadr/NSL_KDD/README.md`](src/tadr/NSL_KDD/README.md)
+- CIC-IDS-2018 → [`src/tadr/IDS18/README.md`](src/tadr/IDS18/README.md)
+- Edge-IIoTset → [`src/tadr/EdgeIIoTset/README.md`](src/tadr/EdgeIIoTset/README.md)
 
 ---
 
@@ -349,7 +349,7 @@ Detailed I/O, CLI, and file-layout documentation for each dataset lives in its o
 ├── pyproject.toml                 # Project metadata & dependencies (managed by uv)
 ├── README.md                      # This file
 └── src/
-    └── apelid/
+    └── tadr/
         ├── NSL_KDD/               # NSL-KDD ablation pipeline + baselines
         │   ├── ablation_pipeline.py
         │   ├── symmetric_label_noise.py
