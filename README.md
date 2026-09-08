@@ -114,7 +114,7 @@ source .venv/bin/activate
 
 ## Running the Ablation Study
 
-The main experimental pipelines and all evaluated baseline implementations use a fixed random seed of `42` by default. Every dataset ships with a single `ablation_pipeline.py` runner that executes all six stages per noise rate and emits a consolidated metrics CSV.
+The main experimental pipelines and all evaluated baseline implementations use a fixed random seed of `42` by default, and all results reported in the paper were obtained using this seed. Every dataset ships with a single `ablation_pipeline.py` runner that executes all six stages per noise rate and emits a consolidated metrics CSV.
 
 ### NSL-KDD
 
